@@ -7,17 +7,15 @@
    ========================================================= */
 window.BLESS_CONFIG = {
 
-  // ▼ Gemini の APIキー（Workerを設定するまではこちらで直接動作）
-  geminiApiKey: "AQ.Ab8RN6L7VgwyW4AcdziJxKlqd2TGhBOIQpoqntJMKaD8bbK2mg",
+  // APIキーはWorkerで管理するためここは空でOK
+  geminiApiKey: "",
   geminiModel:  "gemini-2.5-flash",
 
-  // ▼ Cloudflare Worker URL（デプロイ後にここへ貼り付け）
-  //    例: https://bless-meo.haruto040630.workers.dev
-  workerUrl: "",
+  // ▼ Cloudflare Worker URL
+  workerUrl: "https://breath-meo.haruto-haruto-0630.workers.dev",
 
-  // ▼ 履歴の合言葉（Worker の HISTORY_TOKEN と同じ文字列にする）
-  //    例: "breath2024"  ← 好きな文字列でOK
-  historyToken: "",
+  // ▼ 履歴の合言葉（CloudflareのHISTORY_TOKENと同じ）
+  historyToken: "breath0620",
 
   // Anthropic Claude を使う場合のみ（従量課金）
   anthropicApiKey: "",
