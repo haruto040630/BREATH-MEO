@@ -92,15 +92,6 @@
   .row{display:flex;gap:11px;flex-wrap:wrap}
   .row>div{flex:1;min-width:130px}
   .sec-sep{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;font-weight:800;color:var(--brand-d)}
-  .quality-row{display:flex;align-items:center;gap:12px;margin-top:16px;cursor:pointer;user-select:none}
-  .toggle-wrap{position:relative;flex:0 0 auto}
-  .toggle-wrap input{position:absolute;opacity:0;width:0;height:0}
-  .toggle-track{display:block;width:44px;height:26px;background:#ddd;border-radius:999px;transition:.2s;position:relative}
-  .toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-  .toggle-wrap input:checked ~ .toggle-track{background:var(--brand)}
-  .toggle-wrap input:checked ~ .toggle-track .toggle-thumb{left:21px}
-  .quality-label{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.4}
-  .quality-sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
   .model-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e8f0e9;color:#3a6b45;margin-left:6px;vertical-align:middle}
 
   /* ===== 星 ===== */
@@ -257,14 +248,6 @@
         </div>
       </div>
 
-      <label class="quality-row">
-        <span class="toggle-wrap">
-          <input type="checkbox" id="highQuality" checked />
-          <span class="toggle-track"><span class="toggle-thumb"></span></span>
-        </span>
-        <span class="quality-label">✨ 高品質を優先（2.5-flash を最大50回）<span class="quality-sub">OFFにすると3段階モデルで自動切替</span></span>
-      </label>
-
       <div class="btn-row">
         <button class="btn big" id="genBtn">返信をつくる</button>
       </div>
@@ -289,7 +272,7 @@
     <div class="card">
       <div class="card-title">お店の情報 <span class="badge" id="profSaved"></span></div>
       <label>店名</label><input type="text" id="p_name" />
-      <label>エリア・立地</label><input type="text" id="p_area" />
+      <label>エリア・立地</label><textarea id="p_area"></textarea>
       <label>看板メニュー・特徴</label><textarea id="p_menu"></textarea>
       <label>お店の雰囲気</label><textarea id="p_atmosphere"></textarea>
       <label>文体・キャラクター</label><textarea id="p_tone"></textarea>
@@ -406,7 +389,7 @@ document.getElementById('reviewText').addEventListener('input',function(){
 
 /* ===== お店情報 ===== */
 const PF=['name','area','menu','atmosphere','tone','signature'];
-const PROF_TA=['menu','atmosphere','tone'];
+const PROF_TA=['area','menu','atmosphere','tone'];
 function fillProfile(p){
   PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");
   // autoGrowはタブが表示されてから呼ぶ（display:none中はscrollHeight=0になるため）
@@ -451,14 +434,8 @@ async function callGemini(_key,model,system,userText,structured){
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
     return{system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
-  // プランB（高品質優先ON）: 2.5-flashを最大50回
-  // プランA（高品質優先OFF）: 2.5×5 → 2.0×5 → 1.5×10
-  const highQuality=document.getElementById('highQuality')?.checked!==false;
-  const modelAttempts=highQuality
-    ?[{m:model,                max:50}]
-    :[{m:model,                max:5 },
-      {m:'gemini-2.0-flash',   max:5 },
-      {m:'gemini-1.5-flash',   max:10}];
+  // gemini-2.5-flash で最大5回（有料枠のため混雑なし）
+  const modelAttempts=[{m:model, max:5}];
   let lastErr="";
   for(const {m,max} of modelAttempts){
     for(let attempt=0;attempt<max;attempt++){
