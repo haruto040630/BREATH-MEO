@@ -92,6 +92,16 @@
   .row{display:flex;gap:11px;flex-wrap:wrap}
   .row>div{flex:1;min-width:130px}
   .sec-sep{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;font-weight:800;color:var(--brand-d)}
+  .quality-row{display:flex;align-items:center;gap:12px;margin-top:16px;cursor:pointer;user-select:none}
+  .toggle-wrap{position:relative;flex:0 0 auto}
+  .toggle-wrap input{position:absolute;opacity:0;width:0;height:0}
+  .toggle-track{display:block;width:44px;height:26px;background:#ddd;border-radius:999px;transition:.2s;position:relative}
+  .toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  .toggle-wrap input:checked ~ .toggle-track{background:var(--brand)}
+  .toggle-wrap input:checked ~ .toggle-track .toggle-thumb{left:21px}
+  .quality-label{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.4}
+  .quality-sub{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
+  .model-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e8f0e9;color:#3a6b45;margin-left:6px;vertical-align:middle}
 
   /* ===== 星 ===== */
   .stars{display:flex;gap:8px;align-items:center;font-size:38px;user-select:none}
@@ -247,6 +257,14 @@
         </div>
       </div>
 
+      <label class="quality-row">
+        <span class="toggle-wrap">
+          <input type="checkbox" id="highQuality" checked />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </span>
+        <span class="quality-label">✨ 高品質を優先（2.5-flash を最大50回）<span class="quality-sub">OFFにすると3段階モデルで自動切替</span></span>
+      </label>
+
       <div class="btn-row">
         <button class="btn big" id="genBtn">返信をつくる</button>
       </div>
@@ -257,6 +275,7 @@
     <div class="card" id="resultCard" style="display:none">
       <div class="card-title">
         <img class="ci" src="assets/logo-circle-brown.png" alt="" />返信案
+        <span class="model-badge" id="modelBadge"></span>
       </div>
       <div id="results"></div>
       <div class="btn-row">
@@ -432,10 +451,17 @@ async function callGemini(_key,model,system,userText,structured){
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
     return{system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
-  const models=[model];if(model!=="gemini-2.0-flash")models.push("gemini-2.0-flash");
+  // プランB（高品質優先ON）: 2.5-flashを最大50回
+  // プランA（高品質優先OFF）: 2.5×5 → 2.0×5 → 1.5×10
+  const highQuality=document.getElementById('highQuality')?.checked!==false;
+  const modelAttempts=highQuality
+    ?[{m:model,                max:50}]
+    :[{m:model,                max:5 },
+      {m:'gemini-2.0-flash',   max:5 },
+      {m:'gemini-1.5-flash',   max:10}];
   let lastErr="";
-  for(const m of models){
-    for(let attempt=0;attempt<3;attempt++){
+  for(const {m,max} of modelAttempts){
+    for(let attempt=0;attempt<max;attempt++){
       let res,data;
       try{
         const url=useWorker
@@ -448,9 +474,10 @@ async function callGemini(_key,model,system,userText,structured){
         const cand=data.candidates&&data.candidates[0];
         if(!cand){const br=data.promptFeedback&&data.promptFeedback.blockReason;throw new Error(br?("ブロックされました："+br):"応答が空でした。");}
         const text=((cand.content&&cand.content.parts)||[]).map(p=>p.text||"").join("");
-        if(!structured)return{text};
+        if(!structured)return{text,_model:m};
         if(!text){lastErr="応答が空";await sleep(1000);continue;}
-        try{return JSON.parse(text);}catch(e){throw new Error("返信の解析に失敗しました。もう一度お試しください。");}
+        try{const parsed=JSON.parse(text);parsed._model=m;return parsed;}
+        catch(e){throw new Error("返信の解析に失敗しました。もう一度お試しください。");}
       }
       const status=res.status,msg=(data&&data.error&&data.error.message)||("HTTP "+status);
       lastErr=msg;
@@ -571,6 +598,9 @@ function autoGrow(ta){ta.style.height='auto';ta.style.height=(ta.scrollHeight+2)
 function cleanStyle(s){return(s||"").replace(/^案\d+[：:・\s]*/,"").trim();}
 function renderResults(out,ctx){
   const card=document.getElementById('resultCard');card.style.display='block';
+  // 使用モデルをバッジ表示
+  const badge=document.getElementById('modelBadge');
+  if(badge) badge.textContent=out._model ? '✨ '+out._model : '';
   const box=document.getElementById('results');box.innerHTML='';
   out.replies.forEach((rep,i)=>{
     const div=document.createElement('div');div.className='reply';
