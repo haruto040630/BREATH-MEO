@@ -146,6 +146,12 @@
   .badge{font-size:11px;color:var(--ok);font-weight:800;margin-left:6px}
   a{color:var(--brand-d)}
   .note{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.65}
+  .sync-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--brand-soft);border-radius:11px;padding:10px 13px;margin-bottom:13px;flex-wrap:wrap}
+  #syncMsg{font-size:13px;color:var(--brand-d);font-weight:600}
+  #syncBadge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+  .sync-on{background:#d6ede0;color:var(--ok)}
+  .sync-off{background:#ede8e0;color:var(--muted)}
 
   /* ===== パスワードロック ===== */
   #lock{
@@ -280,7 +286,11 @@
   <!-- 履歴 -->
   <section id="tab-history" class="tab">
     <div class="card">
-      <div class="card-title">履歴</div>
+      <div class="card-title">履歴 <span id="syncBadge"></span></div>
+      <div class="sync-bar" id="syncBar" style="display:none">
+        <span id="syncMsg"></span>
+        <button class="btn ghost sm" id="syncBtn">🔄 今すぐ同期</button>
+      </div>
       <div class="toolbar">
         <input type="text" id="histSearch" placeholder="口コミ・返信を検索" />
       </div>
@@ -347,7 +357,7 @@ document.querySelectorAll('.bottom-nav button').forEach(b=>{
     b.classList.add('active');
     document.getElementById('tab-'+b.dataset.tab).classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
-    if(b.dataset.tab==='history')renderHistory();
+    if(b.dataset.tab==='history'){renderHistory();setSyncUI(syncAvailable()?'クラウドと同期できます':'（Worker未設定）',syncAvailable());}
   };
 });
 
@@ -562,8 +572,75 @@ function renderResults(out,ctx){
   card.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+/* ===== 履歴同期（Cloudflare KV） ===== */
+const syncWorkerUrl  = ()=>(cfg().workerUrl||"").trim();
+const syncToken      = ()=>(cfg().historyToken||"").trim();
+const syncAvailable  = ()=>!!(syncWorkerUrl()&&syncToken());
+
+function setSyncUI(msg,ok){
+  const bar=document.getElementById('syncBar');
+  const badge=document.getElementById('syncBadge');
+  const msgEl=document.getElementById('syncMsg');
+  if(syncAvailable()){
+    bar.style.display='flex';
+    badge.textContent=ok?'同期ON':'同期OFF';
+    badge.className=ok?'sync-on':'sync-off';
+    msgEl.textContent=msg;
+  }else{
+    bar.style.display='none';
+    badge.textContent='';
+  }
+}
+
+async function syncPull(){
+  if(!syncAvailable())return null;
+  try{
+    const res=await fetch(syncWorkerUrl()+'/history',{headers:{'x-history-token':syncToken()}});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const remote=await res.json();
+    if(!Array.isArray(remote))return null;
+    const local=load(LS.history,[]);
+    const localIds=new Set(local.map(x=>x.id));
+    const merged=[...local];
+    remote.forEach(x=>{if(x&&!localIds.has(x.id))merged.push(x);});
+    merged.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    save(LS.history,merged);
+    return merged;
+  }catch(e){setSyncUI('同期に失敗しました',false);return null;}
+}
+
+async function syncPush(){
+  if(!syncAvailable())return;
+  try{
+    const h=load(LS.history,[]);
+    await fetch(syncWorkerUrl()+'/history',{method:'PUT',
+      headers:{'x-history-token':syncToken(),'content-type':'application/json'},
+      body:JSON.stringify(h)});
+  }catch(e){/* silent */}
+}
+
+async function doSync(showResult){
+  setSyncUI('同期中…',true);
+  const merged=await syncPull();
+  if(merged!==null){
+    const dt=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    setSyncUI('最終同期 '+dt,true);
+    if(showResult)renderHistory();
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  if(syncAvailable()) doSync(false);
+});
+document.getElementById('syncBtn').onclick=()=>doSync(true);
+
 /* ===== 履歴 ===== */
-function addHistory(it){const h=load(LS.history,[]);h.unshift({id:Date.now()+Math.floor(Math.random()*999),ts:new Date().toISOString(),...it});save(LS.history,h);}
+function addHistory(it){
+  const h=load(LS.history,[]);
+  h.unshift({id:Date.now()+Math.floor(Math.random()*999),ts:new Date().toISOString(),...it});
+  save(LS.history,h);
+  syncPush(); // クラウドへ即プッシュ
+}
 function renderHistory(){
   const list=document.getElementById('histList');
   const q=(document.getElementById('histSearch').value||'').toLowerCase();
