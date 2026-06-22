@@ -1,22 +1,20 @@
 /* =========================================================
    設定ファイル（管理者＝あなた専用）
-   ※ お母様はこのファイルを触る必要はありません
    ---------------------------------------------------------
-   ここに APIキー を一度だけ貼り付けて保存してください。
-   保存後はアプリを開くたびに自動で読み込まれます。
+   Cloudflare Worker のデプロイ後、workerUrl を貼り付けて
+   保存 → git push してください。
+   APIキーはここには書きません（Worker の Secret に保管）。
    ========================================================= */
 window.BLESS_CONFIG = {
 
-  // 使うサービス： "gemini"（無料枠あり）または "anthropic"
-  provider: "gemini",
+  // ▼ Cloudflare Worker のURL（デプロイ後に貼り付け）
+  //    例: https://bless-meo.haruto040630.workers.dev
+  workerUrl: "",
 
-  // ▼ Gemini の無料APIキーをここに貼り付け（ダブルクォートの中）
-  //    取得 → https://aistudio.google.com/app/apikey
-  geminiApiKey: "AQ.Ab8RN6L7VgwyW4AcdziJxKlqd2TGhBOIQpoqntJMKaD8bbK2mg",
   geminiModel: "gemini-2.5-flash",
 
-  // ▼ Anthropic（Claude）を使う場合だけ設定（従量課金）
+  // Anthropic Claude を使う場合のみ（従量課金）
   anthropicApiKey: "",
-  anthropicModel: "claude-sonnet-4-6"
+  anthropicModel:  "claude-sonnet-4-6"
 
 };
