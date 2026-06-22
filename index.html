@@ -368,8 +368,13 @@ document.getElementById('reviewText').addEventListener('input',function(){
 
 /* ===== お店情報 ===== */
 const PF=['name','area','menu','atmosphere','tone','signature'];
-function fillProfile(p){PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");}
+const PROF_TA=['menu','atmosphere','tone'];
+function fillProfile(p){
+  PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");
+  requestAnimationFrame(()=>PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)autoGrow(el);}));
+}
 function readProfile(){const o={};PF.forEach(k=>o[k]=document.getElementById('p_'+k).value.trim());return o;}
+PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)el.addEventListener('input',()=>autoGrow(el));});
 let profile=load(LS.profile,DEFAULT_PROFILE);fillProfile(profile);
 document.getElementById('profSaved').textContent=load(LS.profile,null)?"保存済み":"";
 document.getElementById('saveProf').onclick=()=>{
