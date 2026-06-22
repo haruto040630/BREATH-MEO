@@ -111,8 +111,11 @@
   .btn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px;align-items:center}
 
   /* ===== URL検知バナー ===== */
-  .url-hint{background:#fff8ee;border:1.5px solid #e8c97a;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#6b4a10;margin-top:10px;display:none}
-  .url-hint strong{display:block;margin-bottom:4px;font-size:14px}
+  .url-hint{background:#fff8ee;border:1.5px solid #e8c97a;border-radius:12px;padding:13px 14px;font-size:13.5px;color:#6b4a10;margin-top:10px;display:none}
+  .url-hint strong{display:block;margin-bottom:10px;font-size:14px}
+  .url-steps{display:flex;flex-direction:column;gap:8px}
+  .url-step{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;line-height:1.5}
+  .url-num{flex:0 0 24px;height:24px;background:#d4971a;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:1px}
 
   /* ===== 返信案 ===== */
   .reply{border:1.5px solid var(--line);border-left:5px solid var(--brand);border-radius:13px;padding:14px;margin-bottom:14px;background:#fffdf9}
@@ -191,8 +194,13 @@
       <label>口コミ <span class="hint">（Googleマップからコピーして貼り付け）</span></label>
       <textarea id="reviewText" placeholder="お客様の口コミをここに貼り付けます"></textarea>
       <div class="url-hint" id="urlHint">
-        <strong>🔗 URLが検出されました</strong>
-        口コミのURL共有では本文は取得できません。Googleマップでそのレビューをひらいてテキストをコピーし、ここに貼り付けてください。
+        <strong>🔗 GoogleマップのURLが検出されました</strong>
+        <div class="url-steps">
+          <div class="url-step"><span class="url-num">1</span>上のURLをタップしてGoogleマップを開く</div>
+          <div class="url-step"><span class="url-num">2</span>口コミの文章を<b>長押し</b>→「すべて選択」→「コピー」</div>
+          <div class="url-step"><span class="url-num">3</span>このアプリに戻って、上の入力欄に貼り付け</div>
+        </div>
+        <div style="font-size:12px;color:#8a6010;margin-top:8px">※ GoogleマップはURLだけではレビュー本文を取得できない仕様のため、コピペが必要です。</div>
       </div>
 
       <label>星の数</label>
