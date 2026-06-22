@@ -14,16 +14,21 @@
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
-    const allowed = env.ALLOWED_ORIGIN || 'https://haruto040630.github.io';
+    const primary = env.ALLOWED_ORIGIN || 'https://haruto040630.github.io';
+
+    // localhost（開発環境）も許可する
+    const allowedOrigins = [primary, 'http://localhost:8765', 'http://localhost:8766', 'http://localhost:8770'];
+    const isAllowed = allowedOrigins.some(o => origin === o || origin.startsWith(o));
+    const corsOrigin = isAllowed ? origin : primary;
 
     const cors = {
-      'Access-Control-Allow-Origin': allowed,
+      'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'content-type, x-history-token',
     };
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-    if (!origin.startsWith(allowed))  return new Response('Forbidden', { status: 403 });
+    if (!isAllowed) return new Response('Forbidden', { status: 403 });
 
     const url  = new URL(request.url);
     const json = (body, status = 200) =>
