@@ -8,9 +8,9 @@
 <script src="config.js"></script>
 <style>
   :root{
-    --bg:#f1e8db;          /* やわらかなクリーム */
+    --bg:#f1e8db;
     --card:#fffdf9;
-    --ink:#43342a;         /* ロゴのコーヒーブラウン */
+    --ink:#43342a;
     --muted:#a3937f;
     --line:#e7dbc9;
     --brand:#6e4b34;
@@ -18,146 +18,182 @@
     --brand-soft:#f3e9db;
     --gold:#dca63f;
     --ok:#4a8a63;
-    --bad:#c4553d;
-    --shadow:0 8px 28px rgba(80,55,30,.12);
-    --r:18px;
+    --shadow:0 4px 18px rgba(80,55,30,.10);
+    --r:16px;
+    --header-h:52px;
+    --nav-h:calc(60px + env(safe-area-inset-bottom,0px));
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;font-size:16px;
-    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:680px;margin:0 auto}
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
 
-  /* ===== ヘッダー ===== */
-  header{background:linear-gradient(140deg,#4b3422,#6e4b34);padding:18px 16px calc(14px + env(safe-area-inset-top,0px));position:sticky;top:0;z-index:30;box-shadow:0 4px 18px rgba(60,40,20,.18)}
-  .brand{display:flex;flex-direction:column;align-items:center;gap:8px}
-  .brand .mark{height:46px;width:auto;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
-  .brand .word{height:20px;width:auto;opacity:.97}
-  .subttl{text-align:center;color:#f0e2d2;font-size:11.5px;letter-spacing:.18em;margin-top:7px;font-weight:600}
-  nav{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}
-  nav button{background:rgba(255,255,255,.14);color:#fff;border:none;padding:11px 6px;border-radius:12px;cursor:pointer;font-size:13.5px;font-weight:700;transition:.15s}
-  nav button.active{background:#fffdf9;color:var(--brand-d)}
+  /* ===== 細いヘッダー ===== */
+  header{
+    height:var(--header-h);
+    background:linear-gradient(100deg,#4b3422,#6e4b34);
+    display:flex;align-items:center;padding:0 14px;
+    position:fixed;top:0;left:0;right:0;z-index:20;
+    box-shadow:0 2px 10px rgba(60,40,20,.18);
+  }
+  .hdr-logo{height:30px;width:30px;flex:0 0 auto}
+  .hdr-title{
+    margin-left:10px;
+    display:flex;flex-direction:column;gap:1px;
+  }
+  .hdr-word{height:13px;width:auto}
+  .hdr-sub{color:#f0e0cc;font-size:9.5px;letter-spacing:.15em;font-weight:600;line-height:1}
 
-  main{padding:20px 14px calc(90px + env(safe-area-inset-bottom,0px))}
-  .tab{display:none;animation:fade .25s ease}
+  /* ===== ボトムナビ ===== */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:20;
+    background:#fffdf9;border-top:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(3,1fr);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    box-shadow:0 -3px 14px rgba(60,40,20,.09);
+  }
+  .bottom-nav button{
+    background:none;border:none;padding:9px 4px 7px;
+    color:var(--muted);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:11px;font-weight:700;transition:.15s;
+  }
+  .bottom-nav button .ico{font-size:20px;line-height:1}
+  .bottom-nav button.active{color:var(--brand)}
+
+  /* ===== メインコンテンツ ===== */
+  main{
+    padding:calc(var(--header-h) + 14px) 14px calc(var(--nav-h) + 14px);
+    max-width:680px;margin:0 auto;
+  }
+  .tab{display:none;animation:fade .22s ease}
   .tab.active{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--shadow);margin-bottom:16px}
-  .card h2{margin:0 0 14px;font-size:16.5px;font-weight:800;display:flex;align-items:center;gap:9px}
-  .card h2 .ci{height:26px;width:26px;border-radius:50%}
-  .lead{font-size:14px;color:var(--brand-d);margin:0 0 16px;font-weight:700}
+  /* ===== カード ===== */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 16px;box-shadow:var(--shadow);margin-bottom:14px}
+  .card-title{margin:0 0 12px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .card-title .ci{height:22px;width:22px;border-radius:50%}
 
-  label{display:block;font-size:14px;font-weight:800;margin:18px 0 8px}
-  .sec-label{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;font-weight:800;color:var(--brand-d)}
-  .hint{font-weight:500;color:var(--muted);font-size:12.5px}
+  /* ===== フォーム要素 ===== */
+  label{display:block;font-size:13.5px;font-weight:800;margin:16px 0 7px}
+  label:first-of-type{margin-top:0}
+  .hint{font-weight:500;color:var(--muted);font-size:12px}
   textarea,input[type=text],input[type=password],select{
-    width:100%;padding:14px 14px;border:1.5px solid var(--line);border-radius:13px;font:inherit;font-size:16px;background:#fff;color:var(--ink);resize:vertical}
-  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(110,75,52,.15)}
-  textarea#reviewText{min-height:140px;line-height:1.8}
-  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236e4b34' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .row>div{flex:1;min-width:140px}
+    width:100%;padding:13px 13px;border:1.5px solid var(--line);border-radius:12px;
+    font:inherit;font-size:16px;background:#fff;color:var(--ink);resize:vertical;
+  }
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(110,75,52,.14)}
+  textarea#reviewText{min-height:120px;line-height:1.8}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236e4b34' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
+  .row{display:flex;gap:11px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:130px}
+  .sec-sep{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;font-weight:800;color:var(--brand-d)}
 
-  .stars{display:flex;gap:10px;align-items:center;font-size:40px;user-select:none}
+  /* ===== 星 ===== */
+  .stars{display:flex;gap:8px;align-items:center;font-size:38px;user-select:none}
   .stars span[data-v]{cursor:pointer;color:#e3d8c4;transition:.1s;line-height:1}
   .stars span[data-v].on{color:var(--gold)}
-  .stars .lbl{font-size:15px;color:var(--brand-d);margin-left:6px;font-weight:800}
+  .stars .lbl{font-size:14px;color:var(--brand-d);margin-left:6px;font-weight:800}
 
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:14px;padding:15px 20px;font-size:16px;font-weight:800;cursor:pointer;transition:.15s}
-  .btn:active{transform:scale(.99)}
+  /* ===== ボタン ===== */
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:13px;padding:14px 18px;font-size:15.5px;font-weight:800;cursor:pointer;transition:.15s}
+  .btn:active{opacity:.88}
   .btn:hover{background:var(--brand-d)}
   .btn:disabled{opacity:.55}
   .btn.ghost{background:#fff;color:var(--brand-d);border:1.5px solid var(--line)}
   .btn.ghost:hover{background:var(--brand-soft)}
-  .btn.sm{padding:10px 15px;font-size:14px;border-radius:11px}
-  .btn.big{width:100%;font-size:17px;padding:17px;border-radius:15px;box-shadow:0 6px 16px rgba(110,75,52,.28)}
-  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+  .btn.sm{padding:9px 14px;font-size:13.5px;border-radius:10px}
+  .btn.big{width:100%;font-size:17px;padding:16px;border-radius:14px;box-shadow:0 5px 14px rgba(110,75,52,.28)}
+  .btn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px;align-items:center}
 
-  .reply{border:1.5px solid var(--line);border-left:5px solid var(--brand);border-radius:14px;padding:15px;margin-bottom:16px;background:#fffdf9}
-  .reply .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-  .reply .style{font-size:12.5px;font-weight:800;color:#fff;background:var(--brand);padding:5px 12px;border-radius:999px}
-  .reply textarea{min-height:60px;background:#fff;overflow:hidden;resize:none;line-height:1.85;font-size:15.5px}
-  .reply .acts{display:flex;gap:9px;margin-top:11px;flex-wrap:wrap}
-  .reply .acts .btn{flex:1;min-width:130px}
-  .cnt{font-size:12px;color:var(--muted)}
+  /* ===== URL検知バナー ===== */
+  .url-hint{background:#fff8ee;border:1.5px solid #e8c97a;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#6b4a10;margin-top:10px;display:none}
+  .url-hint strong{display:block;margin-bottom:4px;font-size:14px}
 
-  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand-d);margin-left:6px}
-  .err{background:#fbece8;border:1px solid #efc7bb;color:#9a3b25;padding:13px 15px;border-radius:13px;font-size:14px;margin-top:14px;white-space:pre-wrap}
+  /* ===== 返信案 ===== */
+  .reply{border:1.5px solid var(--line);border-left:5px solid var(--brand);border-radius:13px;padding:14px;margin-bottom:14px;background:#fffdf9}
+  .reply .meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:8px}
+  .reply .style-tag{font-size:12px;font-weight:800;color:#fff;background:var(--brand);padding:4px 11px;border-radius:999px}
+  .reply textarea{background:#fff;overflow:hidden;resize:none;line-height:1.85;font-size:15px;min-height:50px}
+  .reply .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .reply .acts .btn{flex:1;min-width:120px}
+  .cnt{font-size:11.5px;color:var(--muted)}
+
+  /* ===== エラー / ステータス ===== */
+  .err{background:#fbece8;border:1px solid #efc7bb;color:#9a3b25;padding:12px 14px;border-radius:12px;font-size:14px;margin-top:12px;white-space:pre-wrap}
   .flash{color:var(--ok);font-weight:800;font-size:13px}
-  .status{font-size:13.5px;color:var(--brand-d);display:block;margin-top:10px}
-
-  .spinner{display:inline-block;width:17px;height:17px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px}
+  .status-msg{font-size:13px;color:var(--brand-d);display:block;margin-top:8px}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:7px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  .hist{border:1.5px solid var(--line);border-radius:14px;padding:15px;margin-bottom:13px;background:#fffdf9}
-  .hist .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+  /* ===== 履歴 ===== */
+  .hist{border:1.5px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px;background:#fffdf9}
+  .hist .htop{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
   .hist .date{font-size:12px;color:var(--muted)}
-  .hist .rv{font-size:13px;color:#665b4e;background:var(--bg);border-radius:10px;padding:9px 12px;margin:7px 0}
+  .hist .rv{font-size:13px;color:#665b4e;background:var(--bg);border-radius:9px;padding:8px 11px;margin:6px 0}
   .hist .rp{font-size:14px;white-space:pre-wrap}
-  .empty{text-align:center;color:var(--muted);padding:36px 10px}
-  .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
-  .toolbar input{flex:1;min-width:160px}
-  .badge{font-size:11px;color:var(--ok);font-weight:800}
-  .note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
+  .empty{text-align:center;color:var(--muted);padding:32px 10px}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .toolbar input{flex:1;min-width:150px}
+  .star-pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--brand-soft);color:var(--brand-d)}
+  .badge{font-size:11px;color:var(--ok);font-weight:800;margin-left:6px}
   a{color:var(--brand-d)}
+  .note{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.65}
 
-  @media(min-width:560px){
-    .brand{flex-direction:row;gap:13px}
-    .brand .mark{height:44px}
-    .brand .word{height:22px}
-    .subttl{margin-top:0;align-self:center}
-    header .wrap{position:relative}
+  /* ===== パスワードロック ===== */
+  #lock{
+    position:fixed;inset:0;z-index:1000;
+    background:linear-gradient(160deg,#4b3422,#6e4b34);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px calc(24px + env(safe-area-inset-right,0px)) 24px calc(24px + env(safe-area-inset-left,0px));
   }
-
-  /* ===== パスワードロック画面 ===== */
-  #lock{position:fixed;inset:0;z-index:1000;background:linear-gradient(160deg,#4b3422,#6e4b34);
-    display:flex;align-items:center;justify-content:center;padding:24px calc(24px + env(safe-area-inset-right,0px)) 24px calc(24px + env(safe-area-inset-left,0px))}
-  .lock-inner{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;text-align:center;transform:translateY(-7vh)}
-  .lock-logo{width:190px;height:190px;max-width:60vw;margin-bottom:30px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.28))}
-  .lock-title{color:#f2e6d6;font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:18px}
-  #pwInput{text-align:center;font-size:26px;letter-spacing:.5em;padding:15px 14px;border-radius:15px;border:none;width:100%;margin-bottom:14px;background:#fffdf9;color:var(--ink)}
-  #pwInput:focus{outline:none;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+  .lock-inner{width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;text-align:center;transform:translateY(-8vh)}
+  .lock-logo{width:185px;height:185px;max-width:58vw;margin-bottom:28px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+  .lock-title{color:#f2e6d6;font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:16px}
+  #pwInput{text-align:center;font-size:28px;letter-spacing:.6em;padding:15px 12px;border-radius:14px;border:none;width:100%;margin-bottom:13px;background:#fffdf9;color:var(--ink)}
+  #pwInput:focus{outline:none;box-shadow:0 0 0 4px rgba(255,255,255,.22)}
   #pwBtn{width:100%}
-  .pw-err{color:#ffd6c9;font-size:13.5px;font-weight:700;margin-top:14px;min-height:20px}
+  .pw-err{color:#ffd6c9;font-size:13.5px;font-weight:700;margin-top:12px;min-height:18px}
 </style>
 </head>
 <body>
+
 <!-- ===== パスワードロック ===== -->
 <div id="lock">
   <div class="lock-inner">
     <img class="lock-logo" src="assets/logo-circle-white.png" alt="Cafe de BREATH" />
     <div class="lock-title">パスワードを入力してください</div>
-    <input id="pwInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" />
+    <input id="pwInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" />
     <button class="btn big" id="pwBtn">ひらく</button>
     <div id="pwErr" class="pw-err"></div>
   </div>
 </div>
 
+<!-- ===== 細いヘッダー ===== -->
 <header>
-  <div class="wrap">
-    <div class="brand">
-      <img class="mark" src="assets/logo-circle-white.png" alt="" />
-      <img class="word" src="assets/logo-word-white.png" alt="Cafe de BREATH" />
-    </div>
-    <div class="subttl">口コミ返信アシスタント</div>
-    <nav>
-      <button data-tab="reply" class="active">返信をつくる</button>
-      <button data-tab="profile">お店の情報</button>
-      <button data-tab="history">履歴</button>
-    </nav>
+  <img class="hdr-logo" src="assets/logo-circle-white.png" alt="" />
+  <div class="hdr-title">
+    <img class="hdr-word" src="assets/logo-word-white.png" alt="Cafe de BREATH" />
+    <span class="hdr-sub">口コミ返信アシスタント</span>
   </div>
 </header>
 
-<main class="wrap">
+<!-- ===== コンテンツ ===== -->
+<main>
 
-  <!-- ===== 返信をつくる ===== -->
+  <!-- 返信をつくる -->
   <section id="tab-reply" class="tab active">
     <div class="card">
-      <p class="lead">口コミを貼り付けて、星を選んで、ボタンを押すだけ。</p>
-
       <label>口コミ <span class="hint">（Googleマップからコピーして貼り付け）</span></label>
       <textarea id="reviewText" placeholder="お客様の口コミをここに貼り付けます"></textarea>
+      <div class="url-hint" id="urlHint">
+        <strong>🔗 URLが検出されました</strong>
+        口コミのURL共有では本文は取得できません。Googleマップでそのレビューをひらいてテキストをコピーし、ここに貼り付けてください。
+      </div>
 
       <label>星の数</label>
       <div class="stars" id="stars">
@@ -165,14 +201,14 @@
         <span class="lbl" id="starLbl">★5</span>
       </div>
 
-      <div class="sec-label">くわしい設定</div>
+      <div class="sec-sep">くわしい設定</div>
       <div class="row">
         <div><label>お客様の名前</label><input type="text" id="custName" placeholder="例）田中さん" /></div>
-        <div><label>来店の様子</label><input type="text" id="visit" placeholder="例）記念日で／常連さん" /></div>
+        <div><label>来店の様子</label><input type="text" id="visit" placeholder="例）記念日で" /></div>
       </div>
       <div class="row">
         <div>
-          <label>返信の長さ</label>
+          <label>長さ</label>
           <select id="length">
             <option value="短め（60〜90字程度）">短め</option>
             <option value="標準（100〜180字程度）" selected>標準</option>
@@ -183,16 +219,15 @@
           <label>言語</label>
           <select id="lang">
             <option value="日本語" selected>日本語</option>
-            <option value="auto">口コミと同じ言語</option>
+            <option value="auto">口コミと同じ</option>
             <option value="English">英語</option>
             <option value="中文">中国語</option>
-            <option value="한국어">韓国語</option>
           </select>
         </div>
         <div>
           <label>絵文字</label>
           <select id="emoji">
-            <option value="yes" selected>適度に入れる（☕😊）</option>
+            <option value="yes" selected>適度に入れる</option>
             <option value="no">入れない</option>
           </select>
         </div>
@@ -201,12 +236,14 @@
       <div class="btn-row">
         <button class="btn big" id="genBtn">返信をつくる</button>
       </div>
-      <span class="status" id="genStatus"></span>
+      <span class="status-msg" id="genStatus"></span>
       <div id="genErr"></div>
     </div>
 
     <div class="card" id="resultCard" style="display:none">
-      <h2><img class="ci" src="assets/logo-circle-brown.png" alt="" />返信案 <span id="langPill"></span></h2>
+      <div class="card-title">
+        <img class="ci" src="assets/logo-circle-brown.png" alt="" />返信案
+      </div>
       <div id="results"></div>
       <div class="btn-row">
         <button class="btn ghost sm" id="regenBtn">↻ つくり直す</button>
@@ -214,11 +251,10 @@
     </div>
   </section>
 
-  <!-- ===== お店の情報 ===== -->
+  <!-- お店の情報 -->
   <section id="tab-profile" class="tab">
     <div class="card">
-      <h2>お店の情報 <span class="badge" id="profSaved"></span></h2>
-      <p class="lead">この内容をもとに、お店らしい返信をつくります。</p>
+      <div class="card-title">お店の情報 <span class="badge" id="profSaved"></span></div>
       <label>店名</label><input type="text" id="p_name" />
       <label>エリア・立地</label><input type="text" id="p_area" />
       <label>看板メニュー・特徴</label><textarea id="p_menu"></textarea>
@@ -228,30 +264,36 @@
       <div class="btn-row">
         <button class="btn" id="saveProf">保存する</button>
         <button class="btn ghost" id="resetProf">初期内容に戻す</button>
-        <span class="status" id="profStatus"></span>
+        <span class="status-msg" id="profStatus"></span>
       </div>
     </div>
   </section>
 
-  <!-- ===== 履歴 ===== -->
+  <!-- 履歴 -->
   <section id="tab-history" class="tab">
     <div class="card">
-      <h2>履歴</h2>
-      <p class="lead">保存した返信はこのパソコンにずっと残ります。</p>
+      <div class="card-title">履歴</div>
       <div class="toolbar">
         <input type="text" id="histSearch" placeholder="口コミ・返信を検索" />
       </div>
       <div class="btn-row" style="margin-top:0">
-        <button class="btn ghost sm" id="exportHist">⬇ バックアップ書き出し</button>
+        <button class="btn ghost sm" id="exportHist">⬇ バックアップ</button>
         <button class="btn ghost sm" id="importBtn">⬆ 読み込み</button>
-        <button class="btn ghost sm" id="clearHist">すべて削除</button>
+        <button class="btn ghost sm" id="clearHist">削除</button>
         <input type="file" id="importFile" accept="application/json" style="display:none" />
       </div>
-      <div id="histList" style="margin-top:16px"></div>
+      <div id="histList" style="margin-top:14px"></div>
     </div>
   </section>
 
 </main>
+
+<!-- ===== ボトムナビ ===== -->
+<nav class="bottom-nav">
+  <button data-tab="reply" class="active"><span class="ico">✍️</span>返信をつくる</button>
+  <button data-tab="profile"><span class="ico">🏠</span>お店の情報</button>
+  <button data-tab="history"><span class="ico">📚</span>履歴</button>
+</nav>
 
 <script>
 /* ===== お店情報の初期値 ===== */
@@ -272,16 +314,30 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 /* ===== config.js から読み込み ===== */
 const cfg=()=>window.BLESS_CONFIG||{};
-// Workerが設定されていればGemini、なければAnthropicに切り替え
-const effProvider=()=>(cfg().workerUrl||"").trim() ? "gemini" : ( (cfg().anthropicApiKey||"").trim() ? "anthropic" : "gemini" );
+const effProvider=()=>(cfg().workerUrl||"").trim()?"gemini":((cfg().anthropicApiKey||"").trim()?"anthropic":"gemini");
 const effModel=p=>p==='gemini'?(cfg().geminiModel||"gemini-2.5-flash"):(cfg().anthropicModel||"claude-sonnet-4-6");
 
-/* ===== タブ ===== */
-document.querySelectorAll('nav button').forEach(b=>{
+/* ===== パスワードロック ===== */
+const PASSWORD="0620";
+(function(){
+  const lock=document.getElementById('lock'),inp=document.getElementById('pwInput'),err=document.getElementById('pwErr');
+  document.body.style.overflow='hidden';
+  function unlock(){
+    if((inp.value||'').trim()===PASSWORD){lock.style.display='none';document.body.style.overflow='';}
+    else{err.textContent='パスワードが違います';inp.value='';inp.focus();}
+  }
+  document.getElementById('pwBtn').onclick=unlock;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();unlock();}});
+  setTimeout(()=>inp.focus(),250);
+})();
+
+/* ===== ボトムナビ（タブ切替） ===== */
+document.querySelectorAll('.bottom-nav button').forEach(b=>{
   b.onclick=()=>{
-    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav button').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+    b.classList.add('active');
+    document.getElementById('tab-'+b.dataset.tab).classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
     if(b.dataset.tab==='history')renderHistory();
   };
@@ -294,36 +350,52 @@ function paintStars(v){starEls.forEach(s=>s.classList.toggle('on',Number(s.datas
 starEls.forEach(s=>{s.onclick=()=>{rating=Number(s.dataset.v);paintStars(rating);};});
 paintStars(rating);
 
+/* ===== URL検知（口コミテキストエリア） ===== */
+const MAPS_RE=/https?:\/\/(maps\.app\.goo\.gl|www\.google\.com\/maps|goo\.gl\/maps)/i;
+document.getElementById('reviewText').addEventListener('input',function(){
+  const v=this.value.trim();
+  const hint=document.getElementById('urlHint');
+  hint.style.display=(v.length>5&&MAPS_RE.test(v)&&!v.includes('\n'))?"block":"none";
+});
+
 /* ===== お店情報 ===== */
 const PF=['name','area','menu','atmosphere','tone','signature'];
 function fillProfile(p){PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");}
 function readProfile(){const o={};PF.forEach(k=>o[k]=document.getElementById('p_'+k).value.trim());return o;}
 let profile=load(LS.profile,DEFAULT_PROFILE);fillProfile(profile);
 document.getElementById('profSaved').textContent=load(LS.profile,null)?"保存済み":"";
-document.getElementById('saveProf').onclick=()=>{profile=readProfile();save(LS.profile,profile);const s=document.getElementById('profStatus');s.innerHTML='<span class="flash">✓ 保存しました</span>';document.getElementById('profSaved').textContent="保存済み";setTimeout(()=>s.textContent='',2500);};
-document.getElementById('resetProf').onclick=()=>{if(!confirm('お店の情報を初期内容に戻しますか？'))return;profile={...DEFAULT_PROFILE};fillProfile(profile);save(LS.profile,profile);document.getElementById('profStatus').innerHTML='<span class="flash">戻しました</span>';};
+document.getElementById('saveProf').onclick=()=>{
+  profile=readProfile();save(LS.profile,profile);
+  const s=document.getElementById('profStatus');s.innerHTML='<span class="flash">✓ 保存しました</span>';
+  document.getElementById('profSaved').textContent="保存済み";setTimeout(()=>s.textContent='',2500);
+};
+document.getElementById('resetProf').onclick=()=>{
+  if(!confirm('お店の情報を初期内容に戻しますか？'))return;
+  profile={...DEFAULT_PROFILE};fillProfile(profile);save(LS.profile,profile);
+  document.getElementById('profStatus').innerHTML='<span class="flash">戻しました</span>';
+};
 
-/* ===== API 呼び出し ===== */
+/* ===== API呼び出し ===== */
 async function callClaude(key,model,system,userText,tool){
   const body={model,max_tokens:2500,system,messages:[{role:"user",content:userText}]};
   if(tool){body.tools=[tool];body.tool_choice={type:"tool",name:tool.name};}
-  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+    headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify(body)});
   const data=await res.json();
   if(!res.ok)throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
   return data;
 }
 const GEMINI_SCHEMA={type:"OBJECT",properties:{detected_language:{type:"STRING"},replies:{type:"ARRAY",items:{type:"OBJECT",properties:{style:{type:"STRING"},text:{type:"STRING"}},required:["style","text"]}}},required:["detected_language","replies"]};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
-/* Cloudflare Worker 経由で呼ぶ（キーはWorker側で保管） */
 async function callGemini(_key,model,system,userText,structured){
   const workerUrl=(cfg().workerUrl||"").trim();
-  if(!workerUrl) throw new Error("Worker URLが設定されていません。config.js の workerUrl を設定してください。");
+  if(!workerUrl)throw new Error("Worker URLが未設定です。config.js の workerUrl を設定してください。");
   const baseGc={temperature:0.95,maxOutputTokens:4096};
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
-    return {system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
-  const models=[model]; if(model!=="gemini-2.0-flash")models.push("gemini-2.0-flash");
+    return{system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
+  const models=[model];if(model!=="gemini-2.0-flash")models.push("gemini-2.0-flash");
   let lastErr="";
   for(const m of models){
     for(let attempt=0;attempt<3;attempt++){
@@ -350,7 +422,7 @@ async function callGemini(_key,model,system,userText,structured){
   throw new Error("ただいま混み合っています。少し待ってもう一度お試しください。\n("+lastErr+")");
 }
 
-/* ===== プロンプト ===== */
+/* ===== プロンプト構築 ===== */
 function ratingGuidance(r){return{
   5:"最高評価。心からの感謝を前面に。具体的に喜んでもらえた点に触れ、また来たくなる一言を添える。",
   4:"高評価。感謝を伝えつつ、改善のヒントがあれば前向きに受け止め、次回への期待につなげる。",
@@ -359,7 +431,7 @@ function ratingGuidance(r){return{
   1:"深く誠実に謝罪する。防御的・反論的にならない。改善への真剣な姿勢を示し、可能なら直接お話を伺いたい旨を添える。過度な約束はしない。"
 }[r];}
 function buildSystem(p,r){
-  return `あなたは「${p.name}」というカフェの返信担当者です。Googleマップの口コミに、お店を代表して心のこもった返信文を作成します。
+  return`あなたは「${p.name}」というカフェの返信担当者です。Googleマップの口コミに、お店を代表して心のこもった返信文を作成します。
 
 # お店の情報
 - 店名: ${p.name}
@@ -371,31 +443,31 @@ function buildSystem(p,r){
 
 # 絶対ルール
 1.【個別化を最優先】必ず「その口コミならでは」の返信に。口コミ内の具体的要素（注文・言及メニュー、来店シーン、褒めた点、不満点、時間帯、常連かなど）を最低1つ自然に拾って触れる。汎用テンプレ文だけは禁止。
-2. お店の文体・雰囲気に沿った、温かく自然な文章。ただし【カジュアルになりすぎない】こと。お店を代表する一通として、ていねいで上品な印象を保つ。
+2. お店の文体・雰囲気に沿った、温かく自然な文章。【カジュアルになりすぎない】こと。ていねいで上品な印象を保つ。
 3. お店の情報にない事実を捏造しない。
 4. 個人を特定する情報や、相手を不快にさせる表現は書かない。
 5. 過度な約束（「二度と〜ありません」等）はしない。誠実かつ現実的に。
 6. 文末に署名「${p.signature}」を自然に添える。
 
-# プラスアルファの提案（再来店につなげる）★重要
-- ★4〜5の好意的な口コミでは、お客様がまだ試していない【お店の他の魅力】を「お店の情報」から1つ選び、押し付けがましくならない範囲で、自然におすすめする一文を必ず入れる。
-  例）ランチを召し上がった方へ →「次回はぜひ、当店自慢の自家製シフォンケーキも召し上がってみてください」
-  例）コーヒーやティータイム利用の方へ →「モーニングや日替わりの手作りランチもご用意しておりますので、ぜひまたお立ち寄りください」
-- ★1〜3では、提案よりも【共感・謝罪・改善の姿勢】を優先する（提案は控えめに、または入れない）。
+# プラスαの提案（再来店につなげる）★重要
+- ★4〜5の口コミでは、お客様がまだ試していない【お店の他の魅力】を1つ、押し付けがましくならない範囲で自然におすすめする一文を必ず入れる。
+  例）ランチ利用のお客様へ →「次回はぜひ、当店自慢の自家製シフォンケーキも召し上がってみてください」
+  例）コーヒー・ティータイム利用のお客様へ →「モーニングや日替わりの手作りランチもご用意しておりますので、ぜひまたお立ち寄りください」
+- ★1〜3では提案より【共感・謝罪・改善の姿勢】を優先する。
 
-# 3案の作り分け
-- 案1：ていねいで標準的な基本形。
-- 案2：より温かく親しみやすい（ただし上品さは保つ）。
-- 案3：簡潔で読みやすい短め。
-- いずれの案もカジュアルになりすぎないこと。
+# 3案の作り分け（styleフィールドは短い特徴のみ・「案N」は入れない）
+- 案1：ていねいで標準的な基本形
+- 案2：より温かく親しみやすい（ただし上品さは保つ）
+- 案3：簡潔で読みやすい短め
+- いずれもカジュアルになりすぎないこと。
 
-# 星評価に応じたトーン（今回は${r}つ星）
+# 星評価（${r}つ星）のトーン
 ${ratingGuidance(r)}`;
 }
 function buildUser(reviewText,name,visit,lengthLabel,langSel,emoji){
-  const langLine=langSel==='auto'?"口コミと同じ言語で返信する（日本語以外ならその言語で）。":`返信は必ず「${langSel}」で書く。`;
-  const emojiLine=emoji==='yes'?"3案すべてに、絵文字を各1〜3個、自然な位置に適度に入れる（多用はしない）。":"絵文字は使わない。";
-  return `以下のGoogleマップの口コミに返信してください。
+  const langLine=langSel==='auto'?"口コミと同じ言語で返信する。":`返信は必ず「${langSel}」で書く。`;
+  const emojiLine=emoji==='yes'?"3案すべてに絵文字を各1〜3個、自然な位置に適度に入れる。":"絵文字は使わない。";
+  return`以下のGoogleマップの口コミに返信してください。
 
 【星評価】${rating}つ星
 【投稿者名】${name||"（不明）"}
@@ -409,12 +481,14 @@ ${reviewText}
 
 語り口・強調点・長さの異なる返信案を、それぞれ署名込みで3つ作成してください。`;
 }
-const REPLY_TOOL={name:"submit_replies",description:"3つの返信案を提出する",input_schema:{type:"object",properties:{detected_language:{type:"string"},replies:{type:"array",items:{type:"object",properties:{style:{type:"string"},text:{type:"string"}},required:["style","text"]}}},required:["detected_language","replies"]}};
+const REPLY_TOOL={name:"submit_replies",description:"3つの返信案を提出する",
+  input_schema:{type:"object",properties:{detected_language:{type:"string"},
+    replies:{type:"array",items:{type:"object",properties:{style:{type:"string"},text:{type:"string"}},required:["style","text"]}}},
+    required:["detected_language","replies"]}};
 
 /* ===== 生成 ===== */
 async function generate(){
-  const provider=effProvider();
-  const model=effModel(provider);
+  const provider=effProvider(),model=effModel(provider);
   const reviewText=document.getElementById('reviewText').value.trim();
   const name=document.getElementById('custName').value.trim();
   const visit=document.getElementById('visit').value.trim();
@@ -424,25 +498,18 @@ async function generate(){
 
   const errBox=document.getElementById('genErr');errBox.innerHTML='';
   if(!reviewText){errBox.innerHTML='<div class="err">口コミを貼り付けてください。</div>';return;}
-  // 設定チェック
-  if(provider==='gemini' && !(cfg().workerUrl||"").trim()){
-    errBox.innerHTML='<div class="err">Worker URLが未設定です。管理者の方へ：Cloudflare Workerをデプロイ後、config.js の workerUrl に貼り付けてください。</div>';return;
-  }
-  if(provider==='anthropic' && !(cfg().anthropicApiKey||"").trim()){
-    errBox.innerHTML='<div class="err">APIキーが設定されていません。config.js の anthropicApiKey を設定してください。</div>';return;
-  }
+  if(provider==='gemini'&&!(cfg().workerUrl||"").trim()){
+    errBox.innerHTML='<div class="err">Worker URLが未設定です。config.js の workerUrl を設定してください。</div>';return;}
+  if(provider==='anthropic'&&!(cfg().anthropicApiKey||"").trim()){
+    errBox.innerHTML='<div class="err">APIキーが設定されていません。config.js を確認してください。</div>';return;}
 
   const btn=document.getElementById('genBtn'),st=document.getElementById('genStatus');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>つくっています…';st.textContent='お客様に合わせて考えています…';
   try{
-    const sys=buildSystem(profile,rating), usr=buildUser(reviewText,name,visit,lengthLabel,langSel,emoji);
+    const sys=buildSystem(profile,rating),usr=buildUser(reviewText,name,visit,lengthLabel,langSel,emoji);
     let out;
     if(provider==='gemini') out=await callGemini(null,model,sys,usr,true);
-    else{
-      const key=(cfg().anthropicApiKey||"").trim();
-      const data=await callClaude(key,model,sys,usr,REPLY_TOOL);
-      const b=(data.content||[]).find(c=>c.type==='tool_use');out=b&&b.input;
-    }
+    else{const key=(cfg().anthropicApiKey||"").trim();const data=await callClaude(key,model,sys,usr,REPLY_TOOL);const b=(data.content||[]).find(c=>c.type==='tool_use');out=b&&b.input;}
     if(!out||!Array.isArray(out.replies)||out.replies.length===0)throw new Error("返信の解析に失敗しました。もう一度お試しください。");
     renderResults(out,{reviewText,name,visit,rating});st.textContent='';
   }catch(err){errBox.innerHTML='<div class="err">うまくいきませんでした：\n'+esc(err.message)+'</div>';st.textContent='';}
@@ -451,33 +518,35 @@ async function generate(){
 document.getElementById('genBtn').onclick=generate;
 document.getElementById('regenBtn').onclick=generate;
 
-/* ===== 結果（全文表示・その場で編集・コピー） ===== */
-function autoGrow(ta){ta.style.height='auto';ta.style.height=(ta.scrollHeight+4)+'px';}
+/* ===== 結果表示 ===== */
+function autoGrow(ta){ta.style.height='auto';ta.style.height=(ta.scrollHeight+2)+'px';}
+// styleラベルから「案N：」「案N」等の重複プレフィックスを除去
+function cleanStyle(s){return(s||"").replace(/^案\d+[：:・\s]*/,"").trim();}
 function renderResults(out,ctx){
   const card=document.getElementById('resultCard');card.style.display='block';
-  document.getElementById('langPill').innerHTML=out.detected_language?'<span class="pill">'+esc(out.detected_language)+'</span>':'';
   const box=document.getElementById('results');box.innerHTML='';
   out.replies.forEach((rep,i)=>{
     const div=document.createElement('div');div.className='reply';
     const meta=document.createElement('div');meta.className='meta';
-    meta.innerHTML='<span class="style">案'+(i+1)+'：'+esc(rep.style||'')+'</span><span class="cnt" id="cnt'+i+'"></span>';
+    const styleLabel=cleanStyle(rep.style);
+    meta.innerHTML='<span class="style-tag">案'+(i+1)+(styleLabel?'：'+esc(styleLabel):'')+'</span><span class="cnt" id="cnt'+i+'"></span>';
     const ta=document.createElement('textarea');ta.value=rep.text;
     const acts=document.createElement('div');acts.className='acts';
     const copyBtn=document.createElement('button');copyBtn.className='btn sm';copyBtn.textContent='📋 コピー';
     copyBtn.onclick=()=>navigator.clipboard.writeText(ta.value).then(()=>{copyBtn.textContent='✓ コピーしました';setTimeout(()=>copyBtn.textContent='📋 コピー',1800);});
-    const saveBtn=document.createElement('button');saveBtn.className='btn ghost sm';saveBtn.textContent='💾 履歴に保存';
-    saveBtn.onclick=()=>{addHistory({...ctx,reply:ta.value,style:rep.style});saveBtn.textContent='✓ 保存しました';setTimeout(()=>saveBtn.textContent='💾 履歴に保存',1800);};
+    const saveBtn=document.createElement('button');saveBtn.className='btn ghost sm';saveBtn.textContent='💾 保存';
+    saveBtn.onclick=()=>{addHistory({...ctx,reply:ta.value,style:rep.style});saveBtn.textContent='✓ 保存しました';setTimeout(()=>saveBtn.textContent='💾 保存',1800);};
     const upd=()=>{document.getElementById('cnt'+i).textContent=ta.value.length+'文字';autoGrow(ta);};
     ta.addEventListener('input',upd);
     acts.appendChild(copyBtn);acts.appendChild(saveBtn);
     div.appendChild(meta);div.appendChild(ta);div.appendChild(acts);box.appendChild(div);
-    requestAnimationFrame(()=>{upd();}); // 全文が見えるよう高さ調整
+    requestAnimationFrame(()=>upd());
   });
   card.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-/* ===== 履歴（永続・バックアップ可） ===== */
-function addHistory(it){const h=load(LS.history,[]);h.unshift({id:Date.now()+Math.floor(Math.random()*1000),ts:new Date().toISOString(),...it});save(LS.history,h);}
+/* ===== 履歴 ===== */
+function addHistory(it){const h=load(LS.history,[]);h.unshift({id:Date.now()+Math.floor(Math.random()*999),ts:new Date().toISOString(),...it});save(LS.history,h);}
 function renderHistory(){
   const list=document.getElementById('histList');
   const q=(document.getElementById('histSearch').value||'').toLowerCase();
@@ -488,21 +557,24 @@ function renderHistory(){
   h.forEach(x=>{
     const d=new Date(x.ts),div=document.createElement('div');div.className='hist';
     const stars='★'.repeat(x.rating||0)+'☆'.repeat(5-(x.rating||0));
-    div.innerHTML='<div class="top"><span class="pill">'+stars+'</span><span class="date">'+d.toLocaleString('ja-JP')+'</span></div>'+(x.reviewText?'<div class="rv">'+esc(x.reviewText)+'</div>':'')+'<div class="rp">'+esc(x.reply||'')+'</div>';
-    const acts=document.createElement('div');acts.className='acts';acts.style.cssText='margin-top:10px;display:flex;gap:9px';
-    const cp2=document.createElement('button');cp2.className='btn sm';cp2.textContent='📋 コピー';cp2.onclick=()=>{navigator.clipboard.writeText(x.reply||'');cp2.textContent='✓';setTimeout(()=>cp2.textContent='📋 コピー',1500);};
-    const del=document.createElement('button');del.className='btn ghost sm';del.textContent='🗑 削除';del.onclick=()=>{save(LS.history,load(LS.history,[]).filter(y=>y.id!==x.id));renderHistory();};
-    acts.appendChild(cp2);acts.appendChild(del);div.appendChild(acts);list.appendChild(div);
+    div.innerHTML='<div class="htop"><span class="star-pill">'+stars+'</span><span class="date">'+d.toLocaleString('ja-JP')+'</span></div>'
+      +(x.reviewText?'<div class="rv">'+esc(x.reviewText)+'</div>':'')
+      +'<div class="rp">'+esc(x.reply||'')+'</div>';
+    const acts=document.createElement('div');acts.style.cssText='display:flex;gap:8px;margin-top:9px';
+    const cp=document.createElement('button');cp.className='btn sm';cp.textContent='📋 コピー';
+    cp.onclick=()=>{navigator.clipboard.writeText(x.reply||'');cp.textContent='✓';setTimeout(()=>cp.textContent='📋 コピー',1500);};
+    const dl=document.createElement('button');dl.className='btn ghost sm';dl.textContent='🗑 削除';
+    dl.onclick=()=>{save(LS.history,load(LS.history,[]).filter(y=>y.id!==x.id));renderHistory();};
+    acts.appendChild(cp);acts.appendChild(dl);div.appendChild(acts);list.appendChild(div);
   });
 }
 document.getElementById('histSearch').addEventListener('input',renderHistory);
-document.getElementById('clearHist').onclick=()=>{if(confirm('すべての履歴を削除しますか？（バックアップしておくと復元できます）')){save(LS.history,[]);renderHistory();}};
+document.getElementById('clearHist').onclick=()=>{if(confirm('すべての履歴を削除しますか？')){save(LS.history,[]);renderHistory();}};
 document.getElementById('exportHist').onclick=()=>{
-  const data=JSON.stringify(load(LS.history,[]),null,2);
-  const blob=new Blob([data],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(load(LS.history,[]),null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  const dt=new Date();const pad=n=>String(n).padStart(2,'0');
-  a.download='ブレス返信履歴_'+dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate())+'.json';
+  const dt=new Date();const p=n=>String(n).padStart(2,'0');
+  a.download='ブレス返信履歴_'+dt.getFullYear()+p(dt.getMonth()+1)+p(dt.getDate())+'.json';
   a.click();URL.revokeObjectURL(a.href);
 };
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
@@ -511,36 +583,16 @@ document.getElementById('importFile').onchange=ev=>{
   const r=new FileReader();
   r.onload=()=>{
     try{
-      const incoming=JSON.parse(r.result);
-      if(!Array.isArray(incoming))throw new Error();
-      const cur=load(LS.history,[]);
-      const ids=new Set(cur.map(x=>x.id));
-      const merged=cur.concat(incoming.filter(x=>x&&!ids.has(x.id)));
+      const inc=JSON.parse(r.result);if(!Array.isArray(inc))throw new Error();
+      const cur=load(LS.history,[]),ids=new Set(cur.map(x=>x.id));
+      const merged=cur.concat(inc.filter(x=>x&&!ids.has(x.id)));
       merged.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
-      save(LS.history,merged);renderHistory();
-      alert('読み込みました（'+incoming.length+'件）。');
-    }catch(e){alert('ファイルの読み込みに失敗しました。');}
+      save(LS.history,merged);renderHistory();alert('読み込みました（'+inc.length+'件）。');
+    }catch(e){alert('読み込みに失敗しました。');}
     ev.target.value='';
   };
   r.readAsText(f);
 };
-
-/* ===== パスワードロック（開くたびに入力） ===== */
-const PASSWORD="0620";
-(function(){
-  const lock=document.getElementById('lock');
-  const inp=document.getElementById('pwInput');
-  const err=document.getElementById('pwErr');
-  document.body.style.overflow='hidden';
-  function unlock(){
-    const v=(inp.value||'').trim();
-    if(v===PASSWORD){ lock.style.display='none'; document.body.style.overflow=''; }
-    else{ err.textContent='パスワードが違います'; inp.value=''; inp.focus(); }
-  }
-  document.getElementById('pwBtn').onclick=unlock;
-  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); unlock(); } });
-  setTimeout(()=>inp.focus(),200);
-})();
 </script>
 </body>
 </html>
