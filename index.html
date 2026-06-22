@@ -364,6 +364,9 @@ document.querySelectorAll('.bottom-nav button').forEach(b=>{
       if(syncAvailable()){ setSyncUI('同期中…',true); doSync(true); }
       else setSyncUI('（Worker未設定）',false);
     }
+    if(b.dataset.tab==='profile'){
+      requestAnimationFrame(()=>growProfileTAs());
+    }
   };
 });
 
@@ -387,7 +390,10 @@ const PF=['name','area','menu','atmosphere','tone','signature'];
 const PROF_TA=['menu','atmosphere','tone'];
 function fillProfile(p){
   PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");
-  requestAnimationFrame(()=>PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)autoGrow(el);}));
+  // autoGrowはタブが表示されてから呼ぶ（display:none中はscrollHeight=0になるため）
+}
+function growProfileTAs(){
+  PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)autoGrow(el);});
 }
 function readProfile(){const o={};PF.forEach(k=>o[k]=document.getElementById('p_'+k).value.trim());return o;}
 PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)el.addEventListener('input',()=>autoGrow(el));});
@@ -623,13 +629,27 @@ async function syncPull(){
   }catch(e){setSyncUI('同期に失敗しました',false);return null;}
 }
 
-async function syncPush(){
+/* マージしてからプッシュ（上書きによるデータ消失を防ぐ） */
+async function syncPushSafe(){
   if(!syncAvailable())return;
   try{
-    const h=load(LS.history,[]);
+    // ①まずリモートを取得してローカルとマージ
+    const res=await fetch(syncWorkerUrl()+'/history',{headers:{'x-history-token':syncToken()}});
+    if(res.ok){
+      const remote=await res.json();
+      if(Array.isArray(remote)){
+        const local=load(LS.history,[]);
+        const localIds=new Set(local.map(x=>x.id));
+        const merged=[...local];
+        remote.forEach(x=>{if(x&&!localIds.has(x.id))merged.push(x);});
+        merged.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+        save(LS.history,merged);
+      }
+    }
+    // ②マージ済みの全データをプッシュ
     await fetch(syncWorkerUrl()+'/history',{method:'PUT',
       headers:{'x-history-token':syncToken(),'content-type':'application/json'},
-      body:JSON.stringify(h)});
+      body:JSON.stringify(load(LS.history,[]))});
   }catch(e){/* silent */}
 }
 
@@ -650,7 +670,7 @@ function addHistory(it){
   const h=load(LS.history,[]);
   h.unshift({id:Date.now()+Math.floor(Math.random()*999),ts:new Date().toISOString(),...it});
   save(LS.history,h);
-  syncPush(); // クラウドへ即プッシュ
+  syncPushSafe(); // マージしてからクラウドへプッシュ
 }
 function renderHistory(){
   const list=document.getElementById('histList');
