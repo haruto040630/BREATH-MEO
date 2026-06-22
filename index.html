@@ -398,7 +398,9 @@ const GEMINI_SCHEMA={type:"OBJECT",properties:{detected_language:{type:"STRING"}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function callGemini(_key,model,system,userText,structured){
   const workerUrl=(cfg().workerUrl||"").trim();
-  if(!workerUrl)throw new Error("Worker URLが未設定です。config.js の workerUrl を設定してください。");
+  const directKey=(cfg().geminiApiKey||"").trim();
+  if(!workerUrl&&!directKey)throw new Error("APIキーが設定されていません。config.js の geminiApiKey を設定してください。");
+  const useWorker=!!workerUrl;
   const baseGc={temperature:0.95,maxOutputTokens:4096};
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
@@ -409,8 +411,10 @@ async function callGemini(_key,model,system,userText,structured){
     for(let attempt=0;attempt<3;attempt++){
       let res,data;
       try{
-        res=await fetch(workerUrl+"?model="+encodeURIComponent(m),
-          {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(mkBody(m))});
+        const url=useWorker
+          ? workerUrl+"?model="+encodeURIComponent(m)
+          : "https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":generateContent?key="+encodeURIComponent(directKey);
+        res=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(mkBody(m))});
         data=await res.json();
       }catch(e){lastErr=e.message||"通信エラー";await sleep(1200*(attempt+1));continue;}
       if(res.ok){
@@ -506,8 +510,8 @@ async function generate(){
 
   const errBox=document.getElementById('genErr');errBox.innerHTML='';
   if(!reviewText){errBox.innerHTML='<div class="err">口コミを貼り付けてください。</div>';return;}
-  if(provider==='gemini'&&!(cfg().workerUrl||"").trim()){
-    errBox.innerHTML='<div class="err">Worker URLが未設定です。config.js の workerUrl を設定してください。</div>';return;}
+  if(provider==='gemini'&&!(cfg().workerUrl||"").trim()&&!(cfg().geminiApiKey||"").trim()){
+    errBox.innerHTML='<div class="err">APIキーが設定されていません。config.js の geminiApiKey を設定してください。</div>';return;}
   if(provider==='anthropic'&&!(cfg().anthropicApiKey||"").trim()){
     errBox.innerHTML='<div class="err">APIキーが設定されていません。config.js を確認してください。</div>';return;}
 
