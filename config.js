@@ -9,7 +9,7 @@ window.BLESS_CONFIG = {
 
   // APIキーはWorkerで管理するためここは空でOK
   geminiApiKey: "",
-  geminiModel:  "gemini-2.0-flash",   // 2.5-flashより安定。混雑時は1.5-flashへ自動切替
+  geminiModel:  "gemini-2.5-flash",
 
   // ▼ Cloudflare Worker URL
   workerUrl: "https://breath-meo.haruto-haruto-0630.workers.dev",

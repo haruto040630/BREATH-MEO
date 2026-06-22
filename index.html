@@ -432,8 +432,7 @@ async function callGemini(_key,model,system,userText,structured){
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
     return{system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
-  // フォールバック順: 指定モデル → 2.0-flash → 1.5-flash（混雑時に順番に試す）
-  const models=[...new Set([model,"gemini-2.0-flash","gemini-1.5-flash"])];
+  const models=[model];if(model!=="gemini-2.0-flash")models.push("gemini-2.0-flash");
   let lastErr="";
   for(const m of models){
     for(let attempt=0;attempt<3;attempt++){
@@ -548,32 +547,13 @@ async function generate(){
   try{
     const sys=buildSystem(profile,rating),usr=buildUser(reviewText,name,visit,lengthLabel,langSel,emoji);
     let out;
-    const claudeKey=(cfg().anthropicApiKey||"").trim();
-    if(provider==='gemini'){
-      try{
-        out=await callGemini(null,model,sys,usr,true);
-      }catch(geminiErr){
-        if(geminiErr.retryable && claudeKey){
-          // Gemini混雑時はClaudeに自動切替
-          st.textContent='Geminiが混み合っているためClaudeで生成中…';
-          const claudeModel=effModel('anthropic');
-          const data=await callClaude(claudeKey,claudeModel,sys,usr,REPLY_TOOL);
-          const b=(data.content||[]).find(c=>c.type==='tool_use');
-          out=b&&b.input;
-        }else{
-          throw geminiErr;
-        }
-      }
-    }else{
-      const data=await callClaude(claudeKey,model,sys,usr,REPLY_TOOL);
-      const b=(data.content||[]).find(c=>c.type==='tool_use');out=b&&b.input;
-    }
+    if(provider==='gemini') out=await callGemini(null,model,sys,usr,true);
+    else{const key=(cfg().anthropicApiKey||"").trim();const data=await callClaude(key,model,sys,usr,REPLY_TOOL);const b=(data.content||[]).find(c=>c.type==='tool_use');out=b&&b.input;}
     if(!out||!Array.isArray(out.replies)||out.replies.length===0)throw new Error("返信の解析に失敗しました。もう一度お試しください。");
     renderResults(out,{reviewText,name,visit,rating});st.textContent='';
   }catch(err){
     if(err.retryable){
-      const hasKey=(cfg().anthropicApiKey||"").trim();
-      errBox.innerHTML='<div class="err retry-err">Geminiが混み合っています。'+(hasKey?'':'Anthropic APIキーを設定するとClaudeに自動切替できます。')+'<br><button class="btn sm" id="retryBtn" style="margin-top:10px;width:100%">🔄 再度送信する</button></div>';
+      errBox.innerHTML='<div class="err retry-err">Geminiが混み合っています。<br><button class="btn sm" id="retryBtn" style="margin-top:10px;width:100%">🔄 再度送信する</button></div>';
       document.getElementById('retryBtn').onclick=generate;
     }else{
       errBox.innerHTML='<div class="err">うまくいきませんでした：\n'+esc(err.message)+'</div>';
