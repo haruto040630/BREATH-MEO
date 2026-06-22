@@ -341,8 +341,10 @@ const PASSWORD="0620";
   const lock=document.getElementById('lock'),inp=document.getElementById('pwInput'),err=document.getElementById('pwErr');
   document.body.style.overflow='hidden';
   function unlock(){
-    if((inp.value||'').trim()===PASSWORD){lock.style.display='none';document.body.style.overflow='';}
-    else{err.textContent='パスワードが違います';inp.value='';inp.focus();}
+    if((inp.value||'').trim()===PASSWORD){
+      lock.style.display='none';document.body.style.overflow='';
+      if(syncAvailable()) doSync(false);
+    }else{err.textContent='パスワードが違います';inp.value='';inp.focus();}
   }
   document.getElementById('pwBtn').onclick=unlock;
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();unlock();}});
@@ -357,7 +359,11 @@ document.querySelectorAll('.bottom-nav button').forEach(b=>{
     b.classList.add('active');
     document.getElementById('tab-'+b.dataset.tab).classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
-    if(b.dataset.tab==='history'){renderHistory();setSyncUI(syncAvailable()?'クラウドと同期できます':'（Worker未設定）',syncAvailable());}
+    if(b.dataset.tab==='history'){
+      renderHistory();
+      if(syncAvailable()){ setSyncUI('同期中…',true); doSync(true); }
+      else setSyncUI('（Worker未設定）',false);
+    }
   };
 });
 
@@ -446,7 +452,7 @@ async function callGemini(_key,model,system,userText,structured){
       throw new Error(msg);
     }
   }
-  throw new Error("ただいま混み合っています。少し待ってもう一度お試しください。\n("+lastErr+")");
+  const e=new Error("混雑中");e.retryable=true;throw e;
 }
 
 /* ===== プロンプト構築 ===== */
@@ -539,7 +545,15 @@ async function generate(){
     else{const key=(cfg().anthropicApiKey||"").trim();const data=await callClaude(key,model,sys,usr,REPLY_TOOL);const b=(data.content||[]).find(c=>c.type==='tool_use');out=b&&b.input;}
     if(!out||!Array.isArray(out.replies)||out.replies.length===0)throw new Error("返信の解析に失敗しました。もう一度お試しください。");
     renderResults(out,{reviewText,name,visit,rating});st.textContent='';
-  }catch(err){errBox.innerHTML='<div class="err">うまくいきませんでした：\n'+esc(err.message)+'</div>';st.textContent='';}
+  }catch(err){
+    if(err.retryable){
+      errBox.innerHTML='<div class="err retry-err">Geminiが混み合っています。<br><button class="btn sm" id="retryBtn" style="margin-top:10px;width:100%">🔄 再度送信する</button></div>';
+      document.getElementById('retryBtn').onclick=generate;
+    }else{
+      errBox.innerHTML='<div class="err">うまくいきませんでした：\n'+esc(err.message)+'</div>';
+    }
+    st.textContent='';
+  }
   finally{btn.disabled=false;btn.textContent='返信をつくる';}
 }
 document.getElementById('genBtn').onclick=generate;
@@ -629,9 +643,6 @@ async function doSync(showResult){
   }
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  if(syncAvailable()) doSync(false);
-});
 document.getElementById('syncBtn').onclick=()=>doSync(true);
 
 /* ===== 履歴 ===== */
