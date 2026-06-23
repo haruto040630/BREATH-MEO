@@ -345,7 +345,7 @@ const PASSWORD="0620";
   function unlock(){
     if((inp.value||'').trim()===PASSWORD){
       lock.style.display='none';document.body.style.overflow='';
-      if(syncAvailable()) doSync(false);
+      if(syncAvailable()){ doSync(false); syncProfilePull(); }
     }else{err.textContent='パスワードが違います';inp.value='';inp.focus();}
   }
   document.getElementById('pwBtn').onclick=unlock;
@@ -392,23 +392,50 @@ const PF=['name','area','menu','atmosphere','tone','signature'];
 const PROF_TA=['area','menu','atmosphere','tone'];
 function fillProfile(p){
   PF.forEach(k=>document.getElementById('p_'+k).value=p[k]||"");
-  // autoGrowはタブが表示されてから呼ぶ（display:none中はscrollHeight=0になるため）
 }
 function growProfileTAs(){
   PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)autoGrow(el);});
 }
 function readProfile(){const o={};PF.forEach(k=>o[k]=document.getElementById('p_'+k).value.trim());return o;}
 PROF_TA.forEach(k=>{const el=document.getElementById('p_'+k);if(el)el.addEventListener('input',()=>autoGrow(el));});
+
+/* お店情報のクラウド同期 */
+async function syncProfilePull(){
+  if(!syncAvailable())return;
+  try{
+    const res=await fetch(syncWorkerUrl()+'/profile',{headers:{'x-history-token':syncToken()}});
+    if(!res.ok)return;
+    const remote=await res.json();
+    if(remote&&typeof remote==='object'){
+      profile={...DEFAULT_PROFILE,...remote};
+      save(LS.profile,profile);
+      fillProfile(profile);
+    }
+  }catch(e){/* silent */}
+}
+async function syncProfilePush(p){
+  if(!syncAvailable())return;
+  try{
+    await fetch(syncWorkerUrl()+'/profile',{method:'PUT',
+      headers:{'x-history-token':syncToken(),'content-type':'application/json'},
+      body:JSON.stringify(p)});
+  }catch(e){/* silent */}
+}
+
 let profile=load(LS.profile,DEFAULT_PROFILE);fillProfile(profile);
 document.getElementById('profSaved').textContent=load(LS.profile,null)?"保存済み":"";
-document.getElementById('saveProf').onclick=()=>{
+document.getElementById('saveProf').onclick=async()=>{
   profile=readProfile();save(LS.profile,profile);
-  const s=document.getElementById('profStatus');s.innerHTML='<span class="flash">✓ 保存しました</span>';
-  document.getElementById('profSaved').textContent="保存済み";setTimeout(()=>s.textContent='',2500);
+  const s=document.getElementById('profStatus');
+  s.innerHTML='<span class="flash">✓ 保存しました</span>';
+  document.getElementById('profSaved').textContent="保存済み";
+  await syncProfilePush(profile);
+  setTimeout(()=>s.textContent='',2500);
 };
 document.getElementById('resetProf').onclick=()=>{
   if(!confirm('お店の情報を初期内容に戻しますか？'))return;
   profile={...DEFAULT_PROFILE};fillProfile(profile);save(LS.profile,profile);
+  syncProfilePush(profile);
   document.getElementById('profStatus').innerHTML='<span class="flash">戻しました</span>';
 };
 
@@ -434,8 +461,8 @@ async function callGemini(_key,model,system,userText,structured){
   if(structured){baseGc.responseMimeType="application/json";baseGc.responseSchema=GEMINI_SCHEMA;}
   const mkBody=m=>{const g={...baseGc};if(String(m).indexOf("2.5")>=0)g.thinkingConfig={thinkingBudget:0};
     return{system_instruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:userText}]}],generationConfig:g};};
-  // gemini-2.5-flash で最大5回（有料枠のため混雑なし）
-  const modelAttempts=[{m:model, max:5}];
+  // gemini-2.5-flash で最大15回・1秒固定間隔（有料枠でも偶発503に対応）
+  const modelAttempts=[{m:model, max:15}];
   let lastErr="";
   for(const {m,max} of modelAttempts){
     for(let attempt=0;attempt<max;attempt++){
@@ -446,7 +473,7 @@ async function callGemini(_key,model,system,userText,structured){
           : "https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":generateContent?key="+encodeURIComponent(directKey);
         res=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(mkBody(m))});
         data=await res.json();
-      }catch(e){lastErr=e.message||"通信エラー";await sleep(1200*(attempt+1));continue;}
+      }catch(e){lastErr=e.message||"通信エラー";await sleep(1000);continue;}
       if(res.ok){
         const cand=data.candidates&&data.candidates[0];
         if(!cand){const br=data.promptFeedback&&data.promptFeedback.blockReason;throw new Error(br?("ブロックされました："+br):"応答が空でした。");}
@@ -458,7 +485,7 @@ async function callGemini(_key,model,system,userText,structured){
       }
       const status=res.status,msg=(data&&data.error&&data.error.message)||("HTTP "+status);
       lastErr=msg;
-      if(status===503||status===429||status===500){await sleep(1500*(attempt+1));continue;}
+      if(status===503||status===429||status===500){await sleep(1000);continue;}
       throw new Error(msg);
     }
   }

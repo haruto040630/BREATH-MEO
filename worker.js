@@ -34,6 +34,23 @@ export default {
     const json = (body, status = 200) =>
       new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } });
 
+    /* ── /profile ── 全端末共有のお店情報 ── */
+    if (url.pathname === '/profile') {
+      const token = request.headers.get('x-history-token') || '';
+      if (!env.HISTORY_TOKEN || token !== env.HISTORY_TOKEN)
+        return new Response('Unauthorized', { status: 401 });
+      if (request.method === 'GET') {
+        const data = await env.HISTORY_KV.get('profile', 'json') || null;
+        return json(data);
+      }
+      if (request.method === 'PUT') {
+        const body = await request.json();
+        await env.HISTORY_KV.put('profile', JSON.stringify(body));
+        return json({ ok: true });
+      }
+      return new Response('Method Not Allowed', { status: 405 });
+    }
+
     /* ── /history ── 全端末共有の履歴 ── */
     if (url.pathname === '/history') {
       const token = request.headers.get('x-history-token') || '';
